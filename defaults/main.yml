@@ -1,0 +1,6 @@
+zabbix_mongodb_mongodb_version: 3.2
+zabbix_mongodb_plugin_dir: "/usr/local/zabbix/mongodb/"
+zabbix_mongodb_hostname: "`hostname -s`"
+zabbix_mongodb_username: "zabbixStats"
+zabbix_mongodb_password: "zabbixStats"
+zabbix_mongodb_mongodb_port: 27017

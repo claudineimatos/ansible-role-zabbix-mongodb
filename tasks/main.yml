@@ -1,0 +1,30 @@
+---
+- name: check zabbix plugin scripts directory
+  stat: path={{ zabbix_mongodb_plugin_dir }}
+  register: exists_plugin_dir
+
+- name: create zabbix directory
+  file: path={{ zabbix_mongodb_plugin_dir }} state=directory
+  when: exists_plugin_dir.isdir is not defined
+
+- name: install zabbix sender
+  yum: name=zabbix-sender state=present
+
+- name: install php-pecl-mongo
+  yum: name={{ item }} enablerepo=remi-php56 state=present
+  with_items:
+    - php-pecl-mongo
+    - php-cli
+
+- name: copy plugin files
+  copy: src=files/mikoomi-zabbix-mongodb-monitoring/mongodb-{{ zabbix_mongodb_mongodb_version }}/{{ item }} dest={{ zabbix_mongodb_plugin_dir }}
+  with_items:
+    - mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.php
+    - mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh
+
+- name: set monitor script executable
+  file: path={{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh mode=0555
+
+- name: install cron for zabbix sender
+  template: src=cron_zabbix_mongodb.j2 dest=/etc/cron.d/zabbix_mongodb
+  notify: start / reload crond

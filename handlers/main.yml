@@ -1,0 +1,3 @@
+---
+- name: start / reload crond
+  service: name=crond state=reloaded enabled=yes

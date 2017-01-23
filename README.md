@@ -1,36 +1,75 @@
 Role Name
 =========
 
-A role to install and configure MongoDB Monitoring through Zabbix Agent
+A role to install and configure mikoomi-mongodb-plugin to monitor MongoDB on Zabbix
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role depend's on mikoomi-mongodb-plugin fork (https://github.com/nightw/mikoomi-zabbix-mongodb-monitoring) which is write in PHP, and as such needs PHP with Mongo library from PECL. For RedHat and CentOS it does use PHP 5.6 from Remi repository as early versions deprecated Mongo library in favor of MongoDB.
+
+In case of a Replicaset, it's needed to create a user with rights to read Oplog and ReplicaSet Statistics.
+A role should be created as well as a dedicated user:
+
+    db.runCommand({ createRole: "oplogger", 
+               privileges: [{ resource: { db: 'local', collection: 'oplog.rs'},
+                               actions: ['find']}, ],
+               roles: [{role: 'read', db: 'local'}] })
+    db.createUser ( { user: "zabbixStats", pwd: "zabbixStats", roles: [ "clusterMonitor", "oplogger"] } )
+
+The Zabbix Template from files/mikoomi-zabbix-mongodb-monitoring/mongodb-[2.2, 2.4, 3.2] should be imported on Zabbix and associated to the target hosts.
+
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+This role make use of the following variables and they default values:
+
+    zabbix_mongodb_mongodb_version: 3.2
+    zabbix_mongodb_plugin_dir: "/usr/local/zabbix/mongodb/"
+    zabbix_mongodb_hostname: "`hostname -s`" 
+    zabbix_mongodb_username: "zabbixStats"
+    zabbix_mongodb_password: "zabbixStats"
+    zabbix_mongodb_mongodb_port: 27017
+
+Where:
+
+- *zabbix_mongodb_mongodb_version* is for the MongoDB version ( mikoomi-zabbix-mongodb-monitoring supports 2.2, 2.4 and 3.2)
+- *zabbix_mongodb_plugin_dir* is the folder where the scripts will be saved
+- *zabbix_mongodb_hostname* is the hostname of the monitored host as it's configured on and will be validated by Zabbix Server
+- *zabbix_mongodb_username* is the username to connect on MongoDB
+- *zabbix_mongodb_password* is the password to connect on MongoDB
+- *zabbix_mongodb_mongodb_port* is the MongoDB port
+
+Note that both username and password variables can and should be changed, as well as they should be hold on an encrypted file.
+Take a look on http://docs.ansible.com/ansible/playbooks_vault.html for more information
+
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+This role depends on:
+
+- geerlingguy.repo-remi, to install YUM Remi repositories
+- dj-wasabi.zabbix-agent, to install YUM Zabbix repositories and also zabbix agent (if it's not already installed)
 
 Example Playbook
 ----------------
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: imusica.zabbix-mongodb }
 
 License
 -------
 
 BSD
+
+
+Notes
+-----
+
+Tested on CentOS 6 but should work on any other RedHat based distro.
+
 
 Author Information
 ------------------
