@@ -1,2 +1,3 @@
-HOMR=/tmp
-*/1 * * * * zabbix {{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh -H {{ agent_serveractive }} -z {{ zabbix_mongodb_hostname }}{% if zabbix_mongodb_mongodb_port %} -p {{ zabbix_mongodb_mongodb_port }}{% endif %}{% if zabbix_mongodb_username %} -u {{ zabbix_mongodb_username }}{% endif %}{% if zabbix_mongodb_password %} -x {{ zabbix_mongodb_password }}{% endif %}
+HOME=/tmp
+MAILTO=
+* * * * * zabbix {{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh -H {{ agent_serveractive }} -z {{ zabbix_mongodb_hostname }}{% if zabbix_mongodb_mongodb_port %} -p {{ zabbix_mongodb_mongodb_port }}{% endif %}{% if zabbix_mongodb_username %} -u {{ zabbix_mongodb_username }}{% endif %}{% if zabbix_mongodb_password %} -x {{ zabbix_mongodb_password }}{% endif %} 2> /dev/null
