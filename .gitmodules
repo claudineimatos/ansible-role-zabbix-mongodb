@@ -1,0 +1,3 @@
+[submodule "files/mikoomi-zabbix-mongodb-monitoring"]
+	path = files/mikoomi-zabbix-mongodb-monitoring
+	url = https://github.com/nightw/mikoomi-zabbix-mongodb-monitoring.git
