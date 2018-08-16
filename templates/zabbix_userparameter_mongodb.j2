@@ -1,0 +1,2 @@
+# returns a single integer, but uses zabbix_sender to populate trapper items
+UserParameter=mongodb.status,{{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh -H {{ agent_serveractive }} -z {{ zabbix_mongodb_hostname }}{% if zabbix_mongodb_mongodb_port %} -p {{ zabbix_mongodb_mongodb_port }}{% endif %}{% if zabbix_mongodb_username %} -u {{ zabbix_mongodb_username }}{% endif %}{% if zabbix_mongodb_password %} -x {{ zabbix_mongodb_password }}{% endif %}
