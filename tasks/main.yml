@@ -26,5 +26,7 @@
   file: path={{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh mode=0555
 
 - name: install cron for zabbix sender
-  template: src=cron_zabbix_mongodb.j2 dest=/etc/cron.d/zabbix_mongodb
-  notify: start / reload crond
+  cron:
+    name: zabbix mongodb monitoring
+    user: zabbix
+    job: "{{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh -H {{ agent_serveractive }} -z {{ zabbix_mongodb_hostname }} -p {{ zabbix_mongodb_mongodb_port }} -u {{ zabbix_mongodb_username }} -x {{ zabbix_mongodb_password }} 2> /dev/null"
