@@ -17,16 +17,16 @@
     - php-cli
 
 - name: copy plugin files
-  copy: src=files/mikoomi-zabbix-mongodb-monitoring/mongodb-{{ zabbix_mongodb_mongodb_version }}/{{ item }} dest={{ zabbix_mongodb_plugin_dir }}
+  copy: src=files/mikoomi-zabbix-mongodb-monitoring/mongodb-{{ zabbix_mongodb_mongodb_version }}/{{ item }} dest={{ zabbix_mongodb_plugin_dir }} mode=555
   with_items:
     - mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.php
     - mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh
 
-- name: set monitor script executable
-  file: path={{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh mode=0555
+- name: copy script wrapper
+  template: src=wrapper.sh.j2 dest={{ zabbix_mongodb_plugin_dir }}wrapper.sh mode=550 owner=zabbix group=zabbix
 
 - name: install cron for zabbix sender
   cron:
     name: zabbix mongodb monitoring
     user: zabbix
-    job: "{{ zabbix_mongodb_plugin_dir }}mikoomi-mongodb-plugin-{{ zabbix_mongodb_mongodb_version | replace ('.', '') }}.sh -H {{ agent_serveractive }} -z {{ zabbix_mongodb_hostname }} -p {{ zabbix_mongodb_mongodb_port }} -u {{ zabbix_mongodb_username }} -x {{ zabbix_mongodb_password }} 2> /dev/null"
+    job: "{{ zabbix_mongodb_plugin_dir }}wrapper.sh"
