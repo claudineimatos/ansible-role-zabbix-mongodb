@@ -3,4 +3,3 @@ PATH=$PATH:/etc/zabbix/externalscripts:/opt/zabbix/externalscripts:/opt/zabbix/b
 export PATH
 BASE_DIR="`dirname $0`"
 /usr/bin/php $BASE_DIR/mikoomi-mongodb-plugin-32.php $* 
-echo 0
