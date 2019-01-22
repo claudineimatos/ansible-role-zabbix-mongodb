@@ -112,6 +112,35 @@ function write_to_data_lines($zabbix_name, $key, $value)
 }
 //-------------------------------------------------------------------------//
 
+//-------------------------------------------------------------------------//
+function zabbix_sender($zabbix_server, $zabbix_server_port, $data_lines)
+//-------------------------------------------------------------------------//
+{
+
+	$descriptorspec = array(
+	    0 => array("pipe", "r"),  // stdin
+	    1 => array("pipe", "w"),  // stdout
+	    2 => array("pipe", "w")   // stderr
+	) ;
+
+	$process = proc_open("zabbix_sender -vv -z $zabbix_server -p $zabbix_server_port -i - 2>&1", $descriptorspec, $pipes) ;
+	
+	if (is_resource($process)) {
+	    fwrite($pipes[0], implode("\n", $data_lines)) ;
+	    fclose($pipes[0]) ;
+	
+	    while($s = fgets($pipes[1], 1024)) {
+	        write_to_log("O: " . trim($s)) ;
+	    }
+	    fclose($pipes[1]);
+	
+	    while($s= fgets($pipes[2], 1024)) {
+	        write_to_log("E: " . trim($s)) ;
+	    }
+	    fclose($pipes[2]) ;
+	}
+}
+//-------------------------------------------------------------------------//
 
 //-------------------------------------------------------------------------//
 // Now starts the heart of mongoDB monitoring !!
@@ -137,10 +166,17 @@ if ($ssl) {
 }
 //print ("Mongo connect string - " . $connect_string);
 #$mongo_connection = new Mongo("mongodb://$connect_string") ;
-$mongo_connection = new MongoClient("mongodb://$connect_string") ;
+
+try {
+    $mongo_connection = new MongoClient("mongodb://$connect_string") ;
+} catch (Exception $e) {
+    echo 'Captured exception: ',  $e->getMessage(), "\n";
+} 
 
 if (is_null($mongo_connection)) {
     write_to_log("Error in connection to mongoDB using connect string $connect_string") ;
+    write_to_data_lines($zabbix_name, "status", 0);
+    zabbix_sender($zabbix_server, $zabbix_server_port, $data_lines);
     exit ;
 }
 else {
@@ -157,7 +193,13 @@ $server_status = $mongo_db_handle->command(array('serverStatus'=>1)) ;
 
 if (!isset($server_status['ok'])) {
     write_to_log("Error in executing $command.") ;
+    write_to_data_lines($zabbix_name, "status", 0);
+    zabbix_sender($zabbix_server, $zabbix_server_port, $data_lines);
     exit ;
+}
+else
+{
+	write_to_data_lines($zabbix_name, "status", 1);
 }
 
 //print ("************ ");
@@ -317,6 +359,7 @@ if ($write_backs_queued) {
 } else {
   write_to_data_lines($zabbix_name, "write_backs_queued", "No") ;
 }
+
 /*
 $logging_commits = $server_status['dur']['commits'] ;
 write_to_data_lines($zabbix_name, "logging.commits", $logging_commits) ;
@@ -465,6 +508,7 @@ if ($is_sharded == 'No') {
        $repl_member_attention_state_count = 0 ;
        $repl_member_attenntion_state_info = '' ;
 
+
        foreach($rs_status['members'] as $member) {
            $member_state = $member['state'] ;
 
@@ -477,10 +521,6 @@ if ($is_sharded == 'No') {
 
             $fqdn = explode('.', $mongodb_host);
             $mongodb_host_simple = $fqdn[0];
-
-            if (!in_array($hostname, array($mongodb_host_simple, $mongodb_host))) {
-                continue;
-            }
 
             $mongo_host_optime = $member['optime'];
             $seconds = $master_optime->sec - $mongo_host_optime->sec;
@@ -500,7 +540,6 @@ if ($is_sharded == 'No') {
                // 5 = starting up, phase 2
                // 6 = unknown state
                // 7 = arbiter
-       echo "aaa\n" ;
                // 8 = down
                $repl_member_attention_state_count++ ;
                switch ($member_state) {
@@ -601,27 +640,7 @@ if ($debug_mode) {
     file_put_contents($data_file_name, implode("\n", $data_lines) . "\n") ;
 }
 
-$descriptorspec = array(
-    0 => array("pipe", "r"),  // stdin
-    1 => array("pipe", "w"),  // stdout
-    2 => array("pipe", "w")   // stderr
-) ;
-$process = proc_open("zabbix_sender -vv -z $zabbix_server -p $zabbix_server_port -i - 2>&1", $descriptorspec, $pipes) ;
-
-if (is_resource($process)) {
-    fwrite($pipes[0], implode("\n", $data_lines)) ;
-    fclose($pipes[0]) ;
-
-    while($s = fgets($pipes[1], 1024)) {
-        write_to_log("O: " . trim($s)) ;
-    }
-    fclose($pipes[1]);
-
-    while($s= fgets($pipes[2], 1024)) {
-        write_to_log("E: " . trim($s)) ;
-    }
-    fclose($pipes[2]) ;
-}
+zabbix_sender($zabbix_server, $zabbix_server_port, $data_lines);
 
 exit ;
 
