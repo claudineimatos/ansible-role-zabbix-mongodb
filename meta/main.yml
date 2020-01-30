@@ -37,4 +37,4 @@ galaxy_info:
 
 dependencies: 
   - { role: geerlingguy.repo-remi }
-  - { role: dj-wasabi.zabbix-agent }
+  - { role: dj-wasabi.zabbix-agent, when: zabbix_mongodb_install_zabbix_agent == True }

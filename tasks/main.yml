@@ -11,10 +11,13 @@
   yum: name=zabbix-sender state=present
 
 - name: install php-pecl-mongo
-  yum: name={{ item }} enablerepo=remi-php56 state=present
-  with_items:
-    - php-pecl-mongo
-    - php-cli
+  yum: 
+    name:
+      - php-pecl-mongo
+      - php-cli
+    enablerepo: remi-php56 
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: copy plugin files
   copy: src=files/mikoomi-zabbix-mongodb-monitoring/mongodb-{{ zabbix_mongodb_mongodb_version }}/{{ item }} dest={{ zabbix_mongodb_plugin_dir }} mode=555

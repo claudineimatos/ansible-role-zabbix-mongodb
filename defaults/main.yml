@@ -4,3 +4,4 @@ zabbix_mongodb_hostname: "`hostname -s`"
 zabbix_mongodb_username: "zabbixStats"
 zabbix_mongodb_password: "zabbixStats"
 zabbix_mongodb_mongodb_port: 27017
+zabbix_mongodb_install_zabbix_agent: False

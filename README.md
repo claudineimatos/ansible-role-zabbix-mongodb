@@ -31,6 +31,7 @@ This role make use of the following variables and they default values:
     zabbix_mongodb_username: "zabbixStats"
     zabbix_mongodb_password: "zabbixStats"
     zabbix_mongodb_mongodb_port: 27017
+    zabbix_mongodb_install_zabbix_agent: False
 
 Where:
 
@@ -40,6 +41,7 @@ Where:
 - *zabbix_mongodb_username* is the username to connect on MongoDB
 - *zabbix_mongodb_password* is the password to connect on MongoDB
 - *zabbix_mongodb_mongodb_port* is the MongoDB port
+- *zabbix_mongodb_install_zabbix_agent* instruct this role to also execute the role dj-wasabi.zabbix-agent; defaults to False
 
 Note that both username and password variables can and should be changed, as well as they should be hold on an encrypted file.
 Take a look on http://docs.ansible.com/ansible/playbooks_vault.html for more information
