@@ -59,7 +59,7 @@ Example Playbook
 ----------------
     - hosts: servers
       roles:
-         - { role: imusica.zabbix-mongodb }
+         - { role: claudineimatos.ansible-role-zabbix-mongodb }
 
 License
 -------
@@ -70,10 +70,10 @@ BSD
 Notes
 -----
 
-Tested on CentOS 6 but should work on any other RedHat based distro.
+Tested on CentOS 6 and 7 but should work on any other RedHat based distro.
 
 
 Author Information
 ------------------
 
-Claudinei Matos <claudinei.matos@imusica.com.br>
+Claudinei Matos <claudineimatos@gmail.com>
